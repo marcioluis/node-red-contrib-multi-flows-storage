@@ -1,6 +1,9 @@
 import * as fs from 'fs-extra';
+import * as fspath from "path";
 import { Node } from "./models";
 import { readFlowFile } from "./readFlowFile";
+import * as YAML from "js-yaml";
+import { flowManagerSettings, settings } from './main';
 
 /**
  * write a flow file
@@ -9,7 +12,6 @@ import { readFlowFile } from "./readFlowFile";
  * @returns
  */
 export async function writeFlowFile(filePath: string, flowStrOrArray: string | Node[]) {
-	let str: string;
 
 	async function isReallyChanged(newObj: Node[]) {
 		try {
@@ -31,24 +33,29 @@ export async function writeFlowFile(filePath: string, flowStrOrArray: string | N
 		return false;
 	}
 
+	let str: string;
 	let changed: boolean;
+	const ext = fspath.extname(filePath);
+	const { fileFormat } = flowManagerSettings
+
 	if (typeof flowStrOrArray === 'string') {
-		// changed = await isReallyChanged(
-		// 	filePath.endsWith('.yaml') ? YAML.safeLoad(flowStrOrObject) : JSON.parse(flowStrOrObject)
-		// );
-		changed = await isReallyChanged(JSON.parse(flowStrOrArray));
+		const content = ext === '.yaml' ? YAML.load(flowStrOrArray) : JSON.parse(flowStrOrArray);
+		changed = await isReallyChanged(content);
 		str = flowStrOrArray;
-		//} else if (flowManagerSettings.fileFormat === 'yaml') {
-		//changed = await isReallyChanged(flowStrOrObject);
-		//str = YAML.safeDump(flowStrOrObject);
 	} else {
 		changed = await isReallyChanged(flowStrOrArray);
-		// str = stringifyFormattedFileJson(flowStrOrObject);
-		str = JSON.stringify(flowStrOrArray, undefined, 2);
+		if (fileFormat === 'yaml') {
+			str = YAML.dump(flowStrOrArray)
+		} else {
+			if (settings.flowFilePretty) {
+				str = JSON.stringify(flowStrOrArray, null, 4);
+			} else {
+				str = JSON.stringify(flowStrOrArray);
+			}
+		}
 	}
 
 	if (changed) {
 		await fs.outputFile(filePath, str);
 	}
-	return str;
 }

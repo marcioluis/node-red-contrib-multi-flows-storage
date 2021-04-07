@@ -39,32 +39,32 @@ export async function buildDirectories() {
 	// build basepath
 	try {
 		let basePath: string;
+		let credPath: string;
 		if (settings.flowFile) {
-			const [filename] = settings.flowFile.match(/[\w_-]+\.\w+$/);
-			basePath = fspath.join(settings.userDir, filename.replace(/\.\w+$/, ''));
+			const ffext = fspath.extname(settings.flowFile)
+			const ffname = fspath.basename(settings.flowFile, ffext)
+			basePath = fspath.join(settings.userDir, ffname);
+			credPath = fspath.join(settings.userDir, `${ffname}_cred${ffext}`);
 		} else {
 			basePath = fspath.join(settings.userDir, `flows_${require('os').hostname()}`);
+			credPath = fspath.join(settings.userDir, `flows_${require('os').hostname()}_cred.json`)
 		}
 
 		Object.assign(DIRECTORIES, {
 			basePath,
 			flowsDir: fspath.resolve(basePath, DIR_NAME_FLOW),
 			subflowsDir: fspath.resolve(basePath, DIR_NAME_SUBFLOW),
+			credentialsFile: credPath,
 			flowFile: fspath.resolve(
 				settings.userDir,
 				settings.flowFile || `flows_${require('os').hostname()}`
 			),
-			configNodesFilePathWithoutExtension: fspath.resolve(basePath, CONFIG_NODE_FILE_NAME),
-			configNodesFilePath: `${fspath.resolve(basePath, CONFIG_NODE_FILE_NAME)}.${flowManagerSettings.fileFormat}`,
-			envNodesDir: fspath.resolve(basePath, 'envnodes'),
-			flowManagerCfg: fspath.resolve(basePath, 'flows-cfg.json'),
-			nodesOrderFilePath: fspath.resolve(basePath, 'flow-manager-nodes-order.json')
+			configNodesFilePath: `${fspath.resolve(basePath, CONFIG_NODE_FILE_NAME)}.${flowManagerSettings.fileFormat}`
 		});
 
 		// make dir
 		if (!settings.readOnly) {
-			await fs.ensureDir(DIRECTORIES.flowsDir);
-			await fs.ensureDir(DIRECTORIES.subflowsDir);
+			await Promise.all([fs.ensureDir(DIRECTORIES.flowsDir), fs.ensureDir(DIRECTORIES.subflowsDir)])
 		}
 	} catch (e) {
 		console.error('error creating directories', e);

@@ -2,6 +2,7 @@ import * as fs from 'fs-extra';
 import { FlowRead, Node } from "./models";
 import { writeFlowFile } from './writeFlowFile';
 import { flowManagerSettings } from './main';
+import { load } from 'js-yaml';
 
 /**
  * read a flow file
@@ -24,8 +25,7 @@ export async function readFlowFile(filePath: string, ignoreObj?: boolean) {
 	const indexOfExtension = filePath.lastIndexOf('.');
 	const fileExt = filePath.substring(indexOfExtension + 1).toLowerCase();
 
-	// const finalObject =		fileExt === 'yaml' ? YAML.safeLoad(fileContentsStr) : JSON.parse(fileContentsStr);
-	const finalObject: Node[] = JSON.parse(fileContentsStr);
+	const finalObject: Node[] = fileExt === 'yaml' ? load(fileContentsStr) : JSON.parse(fileContentsStr);
 
 	if (fileExt !== flowManagerSettings.fileFormat) {
 		// File needs conversion

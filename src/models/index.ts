@@ -1,14 +1,16 @@
 import { NodeDef } from "node-red";
 
 export interface Node extends NodeDef {
-    g?: string
-    label?: string
+    g?: string,
+    label?: string,
+    flmOrder?: number
 }
 
 export interface diretorios {
     basePath?: string,
     flowsDir?: string,
     subflowsDir?: string,
+    credentialsFile?: string,
     flowFile?: string,
     configNodesFilePathWithoutExtension?: string,
     configNodesFilePath?: string,
@@ -24,46 +26,18 @@ export interface FlowRead {
 }
 
 export interface Summary {
-    byNodeId?: { [id: string]: Node },
-    nodes?: Node[],
-    groups?: Node[],
-    groupedNodes?: Node[],
-    loadedFlowAndSubflowNames?: {
-        [id: string]: {
-            type?: string,
-            name?: string
-        }
-    }
+    nodes: Node[],
 }
 
 export interface FlowSummary extends Summary {
-    tabs?: Node[],
-    flowVersions?: {
-        [name: string]: {
-            rev?: string,
-            mtime?: Date
-        }
-    }
+    tabs: Node[]
 }
 
 export interface SubflowSummary extends Summary {
-    subflows?: Node[],
-    subflowVersions?: {
-        [name: string]: {
-            rev?: string,
-            mtime?: Date
-        }
-    },
+    subflows: Node[]
 }
 
 export interface GlobalSummary extends Summary {
-    globals?: Node[],
-    globalVersion?: {
-        [name: string]: {
-            rev?: string,
-            mtime?: Date
-        }
-    }
 }
 
 export interface FlowLoaded {

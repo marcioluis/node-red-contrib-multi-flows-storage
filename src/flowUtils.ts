@@ -11,12 +11,30 @@ import { writeFlowFile } from "./writeFlowFile";
  */
 export async function migrateFlowFile() {
 	const masterJsonFlow: Node[] = await fs.readJSON(DIRECTORIES.flowFile);
+	await separeteFlows(masterJsonFlow);
+}
 
+/**
+ * save and separete all flows
+ * @param flows flows array
+ * @returns 
+ */
+export async function saveAndSepareFlow(flows: Node[]) {
+	if (!flows || flows.length === 0) {
+		return Promise.resolve()
+	}
+	await separeteFlows(flows);
+}
+
+async function separeteFlows(flows: Node[]) {
 	const flowNodes: { [id: string]: Node[]; } = {};
 	const simpleNodes: Node[] = [];
 	const configNodes: Node[] = [];
 
-	for (const node of masterJsonFlow) {
+	for (let index = 0; index < flows.length; index++) {
+		const node = flows[index];
+		//add ordering to node
+		node.flmOrder = node.flmOrder || index;
 		if (node.type === 'tab' || node.type === 'subflow') {
 			flowNodes[node.id] = [node];
 		} else if (!node.z || node.z.length === 0) {
@@ -41,12 +59,12 @@ export async function migrateFlowFile() {
 		const rootNode = nodesInFlow[0];
 		const flowName = rootNode.label || rootNode.name; // label on tabs
 
-		const destinationFile = fspath.resolve(
-			DIRECTORIES.basePath,
-			rootNode.type === 'tab' ? DIR_NAME_FLOW : DIR_NAME_SUBFLOW,
-			`${encodeFileName(flowName)}.${flowManagerSettings.fileFormat}`
-		);
+		const dirName = rootNode.type === 'tab' ? DIR_NAME_FLOW : DIR_NAME_SUBFLOW;
+		const fileName = `${encodeFileName(flowName)}.${flowManagerSettings.fileFormat}`;
+		const destinationFile = fspath.resolve(DIRECTORIES.basePath, dirName, fileName);
+		
 		wpromises.push(writeFlowFile(destinationFile, nodesInFlow));
 	}
-	return Promise.all(wpromises);
+
+	await Promise.all(wpromises);
 }
