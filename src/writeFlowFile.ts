@@ -3,7 +3,7 @@ import * as fspath from "path";
 import { Node } from "./models";
 import { readFlowFile } from "./readFlowFile";
 import * as YAML from "js-yaml";
-import { flowManagerSettings, settings } from './main';
+import { flowModuleSettings, settings } from './main';
 
 /**
  * write a flow file
@@ -36,7 +36,7 @@ export async function writeFlowFile(filePath: string, flowStrOrArray: string | N
 	let str: string;
 	let changed: boolean;
 	const ext = fspath.extname(filePath);
-	const { fileFormat } = flowManagerSettings
+	const { fileFormat } = flowModuleSettings
 
 	if (typeof flowStrOrArray === 'string') {
 		const content = ext === '.yaml' ? YAML.load(flowStrOrArray) : JSON.parse(flowStrOrArray);

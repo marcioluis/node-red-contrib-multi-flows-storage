@@ -3,7 +3,8 @@
 	"version": "0.0.1",
 	"license": "MIT",
 	"scripts": {
-		"build": "rm -rdf dist && npx tsc && cp package.json dist && ln -s node_modules dist/node_modules"
+		"build": "rm -rdf dist && npx tsc && cp package.json dist && ln -s node_modules dist/node_modules",
+		"prod": "rm -rdf dist && npx tsc -p tsconfig.prod.json && cp package.json dist && ln -s node_modules dist/node_modules"
 	},
 	"node-red": {
 		"nodes": {

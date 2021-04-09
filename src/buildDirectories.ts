@@ -1,12 +1,13 @@
 import * as fspath from 'path';
 import * as fs from 'fs-extra';
-import { settings, DIRECTORIES, DIR_NAME_FLOW, DIR_NAME_SUBFLOW, CONFIG_NODE_FILE_NAME, flowManagerSettings } from './main';
+import { hostname } from "os";
+import { settings, DIRECTORIES, DIR_NAME_FLOW, DIR_NAME_SUBFLOW, CONFIG_NODE_FILE_NAME, flowModuleSettings } from './main';
 
 /**
- * build the initial dirs
- *
+ * build user dir.
+ * same as node-red
  */
-export async function buildDirectories() {
+export async function buildUserDir() {
 	// copy from node-red localfilesystem
 	// build user dir
 	if (!settings.userDir) {
@@ -21,6 +22,7 @@ export async function buildDirectories() {
 					settings.userDir = fspath.join(process.env.HOMEPATH, '.node-red');
 				}
 			} catch (err) { }
+
 			if (!settings.userDir) {
 				settings.userDir = fspath.join(
 					process.env.HOME ||
@@ -30,12 +32,17 @@ export async function buildDirectories() {
 					'.node-red'
 				);
 				if (!settings.readOnly) {
-					fs.ensureDir(fspath.join(settings.userDir, 'node_modules'));
+					await fs.ensureDir(fspath.join(settings.userDir, 'node_modules'));
 				}
 			}
 		}
 	}
-
+}
+/**
+ * build the initial dirs
+ *
+ */
+export async function buildModuleDirectories() {
 	// build basepath
 	try {
 		let basePath: string;
@@ -46,21 +53,22 @@ export async function buildDirectories() {
 			basePath = fspath.join(settings.userDir, ffname);
 			credPath = fspath.join(settings.userDir, `${ffname}_cred${ffext}`);
 		} else {
-			basePath = fspath.join(settings.userDir, `flows_${require('os').hostname()}`);
-			credPath = fspath.join(settings.userDir, `flows_${require('os').hostname()}_cred.json`)
+			basePath = fspath.join(settings.userDir, `flows_${hostname()}`);
+			credPath = fspath.join(settings.userDir, `flows_${hostname()}_cred.json`)
 		}
 
-		Object.assign(DIRECTORIES, {
-			basePath,
-			flowsDir: fspath.resolve(basePath, DIR_NAME_FLOW),
-			subflowsDir: fspath.resolve(basePath, DIR_NAME_SUBFLOW),
-			credentialsFile: credPath,
-			flowFile: fspath.resolve(
-				settings.userDir,
-				settings.flowFile || `flows_${require('os').hostname()}`
-			),
-			configNodesFilePath: `${fspath.resolve(basePath, CONFIG_NODE_FILE_NAME)}.${flowManagerSettings.fileFormat}`
-		});
+		// base path for new flows: userdir/flowfilename/**
+		DIRECTORIES.basePath = basePath;
+		// new flows dir: userdir/flowfilename/flows
+		DIRECTORIES.flowsDir = fspath.resolve(basePath, DIR_NAME_FLOW);
+		// new subflows dir: userdir/flowfilename/subflows
+		DIRECTORIES.subflowsDir = fspath.resolve(basePath, DIR_NAME_SUBFLOW);
+		// absolute path to credentials file: userdir/flowfilename_cred.json
+		DIRECTORIES.credentialsFile = credPath;
+		// old path to flow file, comes form node-red settings or default to flows_hostname.json
+		DIRECTORIES.flowFile = fspath.resolve(settings.userDir, settings.flowFile || `flows_${hostname()}.json`);
+		// new config absolute path: userdir/flowfilename/config-nodes.[json, yaml]
+		DIRECTORIES.configNodesFilePath = `${fspath.resolve(basePath, CONFIG_NODE_FILE_NAME)}.${flowModuleSettings.fileFormat}`;
 
 		// make dir
 		if (!settings.readOnly) {

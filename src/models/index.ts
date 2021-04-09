@@ -1,5 +1,8 @@
 import { NodeDef } from "node-red";
 
+export interface FlowModuleOptions {
+    fileFormat: string
+}
 export interface Node extends NodeDef {
     g?: string,
     label?: string,
@@ -12,11 +15,7 @@ export interface diretorios {
     subflowsDir?: string,
     credentialsFile?: string,
     flowFile?: string,
-    configNodesFilePathWithoutExtension?: string,
-    configNodesFilePath?: string,
-    envNodesDir?: string,
-    flowManagerCfg?: string,
-    nodesOrderFilePath?: string,
+    configNodesFilePath?: string
 }
 
 export interface FlowRead {
@@ -35,9 +34,6 @@ export interface FlowSummary extends Summary {
 
 export interface SubflowSummary extends Summary {
     subflows: Node[]
-}
-
-export interface GlobalSummary extends Summary {
 }
 
 export interface FlowLoaded {

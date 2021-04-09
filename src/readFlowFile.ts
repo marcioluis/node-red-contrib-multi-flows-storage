@@ -1,8 +1,8 @@
 import * as fs from 'fs-extra';
+import { extname } from "path";
 import { FlowRead, Node } from "./models";
-import { writeFlowFile } from './writeFlowFile';
-import { flowManagerSettings } from './main';
-import { load } from 'js-yaml';
+import { load as yaml } from 'js-yaml';
+import { syncFilesFormat } from './syncFilesFormat';
 
 /**
  * read a flow file
@@ -10,7 +10,6 @@ import { load } from 'js-yaml';
  * @param {boolean} ignoreObj true if ignore object read from flow
  * @returns an object
  */
-
 export async function readFlowFile(filePath: string, ignoreObj?: boolean) {
 	const retVal: FlowRead = {};
 
@@ -22,21 +21,10 @@ export async function readFlowFile(filePath: string, ignoreObj?: boolean) {
 		return retVal;
 	}
 
-	const indexOfExtension = filePath.lastIndexOf('.');
-	const fileExt = filePath.substring(indexOfExtension + 1).toLowerCase();
+	const fileExt = extname(filePath).toLowerCase();
+	const finalObject: Node[] = fileExt === '.yaml' ? yaml(fileContentsStr) : JSON.parse(fileContentsStr);
 
-	const finalObject: Node[] = fileExt === 'yaml' ? load(fileContentsStr) : JSON.parse(fileContentsStr);
-
-	if (fileExt !== flowManagerSettings.fileFormat) {
-		// File needs conversion
-		const newFilePathWithNewExt = `${filePath.substring(0, indexOfExtension)}.${flowManagerSettings.fileFormat}`;
-		await writeFlowFile(newFilePathWithNewExt, finalObject);
-
-		// Delete old file
-		await fs.remove(filePath);
-		filePath = newFilePathWithNewExt;
-	}
-
+	filePath = await syncFilesFormat(filePath, finalObject);
 	retVal.mtime = (await fs.stat(filePath)).mtime;
 	retVal.nodes = finalObject;
 
