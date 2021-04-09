@@ -13,6 +13,7 @@ import { diretorios, FlowModuleOptions } from "./models";
 export const DIRECTORIES: diretorios = {};
 export const DIR_NAME_FLOW = 'flows';
 export const DIR_NAME_SUBFLOW = 'subflows';
+export const OPTIONS_FILE_NAME = 'multiflows-options.json'
 export const CONFIG_NODE_FILE_NAME = 'config-nodes';
 export const flowModuleSettings: FlowModuleOptions = {
 	fileFormat: 'yaml'
@@ -34,7 +35,7 @@ async function init(_settings: object, runtime?: object) {
 
 	try {
 		// this module options file
-		const options = await readJson(resolve(settings.userDir, 'flowsmodule-options.json'));
+		const options = await readJson(resolve(settings.userDir, OPTIONS_FILE_NAME));
 		Object.assign(flowModuleSettings, options)
 		const { fileFormat } = flowModuleSettings
 		if (!fileFormat || fileFormat.length === 0 || !['json', 'yaml'].includes(fileFormat)) {
