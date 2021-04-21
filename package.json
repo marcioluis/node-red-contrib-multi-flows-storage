@@ -1,10 +1,10 @@
 {
   "name": "node-red-contrib-multi-flows-storage",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "scripts": {
 		"local": "rm -rdf dist && npx tsc && cp package.module.json dist/package.json && ln -s node_modules dist/node_modules",
-		"prod": "rm -rdf dist && npx tsc -p tsconfig.prod.json && cp package.json dist/package.json"
+		"prod": "rm -rdf dist && npx tsc -p tsconfig.prod.json && cp package.json README.md dist/"
 	},
   "author": {
     "name": "Márcio Luis Soster Arrosi",
