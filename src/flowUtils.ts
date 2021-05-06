@@ -2,7 +2,7 @@ import * as fspath from 'path';
 import * as fs from 'fs-extra';
 import { encodeFileName } from './utils';
 import { Node } from "./models";
-import { DIRECTORIES, DIR_NAME_FLOW, DIR_NAME_SUBFLOW, flowModuleSettings } from './main';
+import { CONFIG_NODE_FILE_NAME, DIRECTORIES, DIR_NAME_FLOW, DIR_NAME_SUBFLOW, flowModuleSettings } from './main';
 import { writeFlowFile } from "./writeFlowFile";
 
 /**
@@ -52,7 +52,6 @@ async function separeteFlows(flows: Node[]) {
 
 	// writes
 	const wpromises = [];
-	wpromises.push(writeFlowFile(DIRECTORIES.configNodesFilePath, configNodes));
 
 	for (const flowId of Object.keys(flowNodes)) {
 		const nodesInFlow = flowNodes[flowId];
@@ -62,9 +61,11 @@ async function separeteFlows(flows: Node[]) {
 		const dirName = rootNode.type === 'tab' ? DIR_NAME_FLOW : DIR_NAME_SUBFLOW;
 		const fileName = `${encodeFileName(flowName)}.${flowModuleSettings.fileFormat}`;
 		const destinationFile = fspath.resolve(DIRECTORIES.basePath, dirName, fileName);
-		
+
 		wpromises.push(writeFlowFile(destinationFile, nodesInFlow));
 	}
 
+	const configDestination = fspath.resolve(DIRECTORIES.configNodesDir, `${CONFIG_NODE_FILE_NAME}.${flowModuleSettings.fileFormat}`)
+	wpromises.push(writeFlowFile(configDestination, configNodes));
 	await Promise.all(wpromises);
 }

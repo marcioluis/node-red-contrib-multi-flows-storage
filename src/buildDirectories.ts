@@ -1,7 +1,7 @@
 import * as fspath from 'path';
 import * as fs from 'fs-extra';
 import { hostname } from "os";
-import { settings, DIRECTORIES, DIR_NAME_FLOW, DIR_NAME_SUBFLOW, CONFIG_NODE_FILE_NAME, flowModuleSettings } from './main';
+import { settings, DIRECTORIES, DIR_NAME_FLOW, DIR_NAME_SUBFLOW, DIR_NAME_GLOBAL } from './main';
 
 /**
  * build user dir.
@@ -67,8 +67,8 @@ export async function buildModuleDirectories() {
 		DIRECTORIES.credentialsFile = credPath;
 		// old path to flow file, comes form node-red settings or default to flows_hostname.json
 		DIRECTORIES.flowFile = fspath.resolve(settings.userDir, settings.flowFile || `flows_${hostname()}.json`);
-		// new config absolute path: userdir/flowfilename/config-nodes.[json, yaml]
-		DIRECTORIES.configNodesFilePath = `${fspath.resolve(basePath, CONFIG_NODE_FILE_NAME)}.${flowModuleSettings.fileFormat}`;
+		// new config path: userdir/flowfilename/global
+		DIRECTORIES.configNodesDir = fspath.resolve(basePath, DIR_NAME_GLOBAL);
 
 		// make dir
 		if (!settings.readOnly) {

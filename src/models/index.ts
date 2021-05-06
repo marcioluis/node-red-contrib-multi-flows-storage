@@ -15,7 +15,7 @@ export interface diretorios {
     subflowsDir?: string,
     credentialsFile?: string,
     flowFile?: string,
-    configNodesFilePath?: string
+    configNodesDir?: string
 }
 
 export interface FlowRead {
