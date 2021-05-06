@@ -2,7 +2,7 @@ import * as fspath from 'path';
 import * as fs from 'fs-extra';
 import { encodeFileName } from './utils';
 import { Node } from "./models";
-import { CONFIG_NODE_FILE_NAME, DIRECTORIES, DIR_NAME_FLOW, DIR_NAME_SUBFLOW, flowModuleSettings } from './main';
+import { CONFIG_NODE_FILE_NAME, DIRECTORIES, flowModuleSettings } from './main';
 import { writeFlowFile } from "./writeFlowFile";
 
 /**
@@ -58,9 +58,9 @@ async function separeteFlows(flows: Node[]) {
 		const rootNode = nodesInFlow[0];
 		const flowName = rootNode.label || rootNode.name; // label on tabs
 
-		const dirName = rootNode.type === 'tab' ? DIR_NAME_FLOW : DIR_NAME_SUBFLOW;
+		const dirName = rootNode.type === 'tab' ? DIRECTORIES.flowsDir : DIRECTORIES.subflowsDir;
 		const fileName = `${encodeFileName(flowName)}.${flowModuleSettings.fileFormat}`;
-		const destinationFile = fspath.resolve(DIRECTORIES.basePath, dirName, fileName);
+		const destinationFile = fspath.resolve(dirName, fileName);
 
 		wpromises.push(writeFlowFile(destinationFile, nodesInFlow));
 	}
