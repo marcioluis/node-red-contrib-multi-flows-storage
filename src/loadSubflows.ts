@@ -3,6 +3,7 @@ import * as fs from 'fs-extra';
 import { Node, SubflowSummary } from "./models";
 import { readFlowFile } from './readFlowFile';
 import { DIRECTORIES } from './main';
+import { addFileForDuplicityControl } from './duplicityChecker';
 
 /**
  * load all subflows
@@ -16,8 +17,16 @@ export async function loadSubflows() {
 		nodes: []
 	};
 
+	const ext = {
+		'.json': true,
+		'.yaml': true,
+	}
+
 	let filesnames = await fs.readdir(DIRECTORIES.subflowsDir);
-	filesnames = filesnames.filter(f => ['.json', '.yaml'].includes(fspath.extname(f).toLowerCase()));
+	filesnames = filesnames.filter(f => {
+		const e = fspath.extname(f).toLowerCase();
+		return ext[e];
+	});
 
 	for (const name of filesnames) {
 		try {
@@ -29,6 +38,7 @@ export async function loadSubflows() {
 			for (let i = subflowobj.nodes.length - 1; i >= 0; i--) {
 				const node = subflowobj.nodes[i];
 
+				addFileForDuplicityControl(name, node);
 				if (node.type === 'subflow') {
 					flowSummary.subflows.push(node);
 					subflowNode = node;

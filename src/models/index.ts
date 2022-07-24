@@ -6,7 +6,7 @@ export interface FlowModuleOptions {
 export interface Node extends NodeDef {
     g?: string,
     label?: string,
-    flmOrder?: number
+    flmOrder?: number,
 }
 
 export interface diretorios {
@@ -39,4 +39,17 @@ export interface SubflowSummary extends Summary {
 export interface FlowLoaded {
     flows?: Node[],
     rev?: string
+}
+
+export interface FileControl {
+    fileName?: string,
+    nodeName?: string,
+}
+
+export interface RemoveOptions {
+    baseDir: string, 
+    deleteFiles: string[], 
+    newNodeName: string, 
+    newFileName: string, 
+    nodeId: string,
 }

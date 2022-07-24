@@ -3,6 +3,7 @@ import * as fs from 'fs-extra';
 import { FlowSummary, Node } from "./models";
 import { readFlowFile } from './readFlowFile';
 import { DIRECTORIES } from './main';
+import { addFileForDuplicityControl } from './duplicityChecker';
 
 /**
  * load all flows
@@ -16,8 +17,16 @@ export async function loadFlows() {
 		tabs: []
 	};
 
+	const ext = {
+		'.json': true,
+		'.yaml': true,
+	}
+
 	let filesnames = await fs.readdir(DIRECTORIES.flowsDir);
-	filesnames = filesnames.filter(f => ['.json', '.yaml'].includes(fspath.extname(f).toLowerCase()));
+	filesnames = filesnames.filter(f => {
+		const e = fspath.extname(f).toLowerCase();
+		return ext[e];
+	});
 
 	// foreach file name
 	for (const name of filesnames) {
@@ -28,6 +37,8 @@ export async function loadFlows() {
 			let tab: Node;
 			for (let i = flowobj.nodes.length - 1; i >= 0; i--) {
 				const node = flowobj.nodes[i];
+
+				addFileForDuplicityControl(name, node);
 				if (node.type === 'tab') {
 					flowSummary.tabs.push(node);
 					tab = node;
