@@ -41,8 +41,10 @@ async function separeteFlows(flows: Node[]) {
 
 	for (let index = 0; index < flows.length; index++) {
 		const node = flows[index];
-		//add ordering to node
-		node.flmOrder = node.flmOrder || index;
+		if (node.type === 'tab') {
+			//add ordering to node type tab
+			node.flmOrder = node.flmOrder || index;
+		}
 		if (node.type === 'tab' || node.type === 'subflow') {
 			flowNodes.set(node.id, [node]);
 			// checkDouble({nodeId: node.id, nodeName: node.label || node.name})
